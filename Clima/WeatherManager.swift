@@ -8,9 +8,17 @@
 
 import Foundation
 
+protocol WeatherManagerDelegate{
+    func didUpdateWeather(_ weathermanager: WeatherManager, weather: WeatherModel)
+    func didFailWithError(error: Error)
+}
 struct WeatherManager {
+    
+    
+    
     let weatherURL = "https://api.openweathermap.org/data/2.5/weather?&appid=6b615da85e89041952546345f8e70af5&units=metric"
     
+    var delegate: WeatherManagerDelegate?
     
     func fetchWeather(cityName: String){
         let urlString = "\(weatherURL)&q=\(cityName)"
@@ -28,13 +36,15 @@ struct WeatherManager {
             let task = session.dataTask(with: url) { (data, respose, error) in
                 if error != nil
                 {    print(error!)
-                    
+                    self.delegate?.didFailWithError(error: error!)
                     return
                 }
                 if let safeData = data {
                     let dataString = String(data: safeData,encoding: .utf8)
                     ///print(dataString!)
-                    parseJSON(weatherData: safeData)
+                    if  let weather = self.parseJSON(weatherData: safeData){
+                        self.delegate?.didUpdateWeather(self,weather: weather)
+                    }
                     
                     
                 }
@@ -43,7 +53,7 @@ struct WeatherManager {
         }}
     
     
-    func parseJSON(weatherData: Data){
+    func parseJSON(weatherData: Data) -> WeatherModel? {
         
         let decoder = JSONDecoder()
         do{
@@ -57,15 +67,19 @@ struct WeatherManager {
             
             
             let weather = WeatherModel(conditionId: id, cityName: name, temperature: temp)
+            
             print(weather.conditionName)
             print(weather.temperatureString)
+            return weather
             
         }catch {
             print(error)
+            self.delegate?.didFailWithError(error: error)
+            return nil
         }
     }
     
-   
+    
     //    func handle(data: Data?, response: URLResponse?, error: Error?)
     //    {
     //        if error != nil
