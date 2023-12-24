@@ -8,7 +8,7 @@
 
 import UIKit
 
-class WeatherViewController: UIViewController, UITextFieldDelegate ,WeatherManagerDelegate{
+class WeatherViewController: UIViewController{
    
     
     
@@ -25,18 +25,26 @@ class WeatherViewController: UIViewController, UITextFieldDelegate ,WeatherManag
         searchTextField.delegate = self
         weatherManager.delegate = self
     }
+    
+}
 
 
-    @IBAction func searchPressed(_ sender: UIButton) {
-        print(searchTextField.text!)
-        searchTextField.endEditing(true)
-    }
+//MARK: - UITextFieldDelegate
+
+extension WeatherViewController: UITextFieldDelegate {
     
     func textFieldShouldReturn(_ textField: UITextField) -> Bool {
         searchTextField.endEditing(true)
         print(searchTextField.text!)
         return true
     }
+    
+    @IBAction func searchPressed(_ sender: UIButton) {
+        print(searchTextField.text!)
+        searchTextField.endEditing(true)
+    }
+    
+ 
     
     func textFieldShouldEndEditing(_ textField: UITextField) -> Bool {
         if textField.text != ""{
@@ -55,6 +63,12 @@ class WeatherViewController: UIViewController, UITextFieldDelegate ,WeatherManag
         
         searchTextField.text = ""
     }
+}
+
+//MARK: - WeatherManagerDelegate
+
+
+extension WeatherViewController: WeatherManagerDelegate{
     
     func didUpdateWeather(_ weatherManager: WeatherManager, weather: WeatherModel){
         print(weather.temperatureString)
@@ -73,6 +87,4 @@ class WeatherViewController: UIViewController, UITextFieldDelegate ,WeatherManag
     func didFailWithError(error: Error) {
         print(error)
     }
-    
 }
-
